@@ -3,8 +3,6 @@
 
 import random
 
-from transitions import Machine
-
 from elephantfish import *
 
 def get_menu():
