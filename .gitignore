@@ -1,0 +1,4 @@
+config.yml
+*.log
+*.pkl
+__pycache__
