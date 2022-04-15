@@ -1,6 +1,6 @@
 # chinese-chess-bot
 
-中国象棋频道机器人，核心的象棋算法出自 [bupticybee](https://github.com/bupticybee/elephantfish)。
+中国象棋频道机器人，核心的象棋算法出自 [bupticybee/elephantfish](https://github.com/bupticybee/elephantfish)。
 
 ## 使用方法
 
