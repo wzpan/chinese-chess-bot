@@ -13,12 +13,20 @@ import re
 import qqbot
 from qqbot.core.util.yaml_util import YamlUtil
 
+from chess import ChessGame
+from chess import get_menu
 from command_register import command
-from chess import ChessGame, get_menu
-
+from utils import give_role
+from utils import is_admin
+from utils import send_message
 
 config = YamlUtil.read(os.path.join(os.path.dirname(__file__), "config.yml"))
-T_TOKEN = qqbot.Token(config["bot"]["appid"], config["bot"]["token"])
+TOKEN = qqbot.Token(config["bot"]["appid"], config["bot"]["token"])
+ENABLE_HORNOR = config["hornor_role"]["enable"]
+if ENABLE_HORNOR:
+    ROLE_INFO = qqbot.RoleUpdateInfo(config["hornor_role"]["name"], 
+                                    config["hornor_role"]["color"],
+                                    1)
 GAME_DATA = {}
 
 def _get_game_by_channel_id(channel_id: str):
@@ -34,66 +42,80 @@ async def _invalid_func(event: str,  message: qqbot.Message):
     """
     当参数不符合要求时的处理函数
     """
-    await _send_message("请输入正确的步法。例如 /下棋 h2e2", event, message)
+    await send_message("请输入正确的步法。例如 /下棋 h2e2", event, message)
     return True
 
-async def _send_message(content: str, event: str, message: qqbot.Message):
+def _is_surrenderable(guild_id: str, channel_id: str, user_id: str):
     """
-    机器人发送消息
+    是否可以结束游戏
+    只有开局的人和管理员才能结束游戏
     """
-    msg_api = qqbot.AsyncMessageAPI(T_TOKEN, False)
-    dms_api = qqbot.AsyncDmsAPI(T_TOKEN, False)
+    game = _get_game_by_channel_id(channel_id)
+    return is_admin(TOKEN, guild_id, user_id) or (game and game['creator'] == user_id)
 
-    send = qqbot.MessageSendRequest(content, message.id)
-    if event == "DIRECT_MESSAGE_CREATE":
-        await dms_api.post_direct_message(message.guild_id, send)
+def _give_hornor(guild_id: str, user_id: str):    
+    api = qqbot.UserAPI(TOKEN, False)
+    if ENABLE_HORNOR and is_admin(TOKEN, guild_id, api.me().id):
+        qqbot.logger.info("颁发象棋大师身份组")
+        give_role(TOKEN, guild_id, user_id, ROLE_INFO)
     else:
-        await msg_api.post_message(message.channel_id, send)
+        qqbot.logger.info("不颁发象棋大师身份组")
 
-@command("/开局")
+@command("开局")
 async def start_game(params: str, event: str, message: qqbot.Message):
     if message.channel_id in GAME_DATA:
         ret = "游戏已经开始了，请等待下一局。您也可以使用 `/投降` 指令提前结束游戏。"
     else:
         game = ChessGame()
-        GAME_DATA[message.channel_id] = game
+        GAME_DATA[message.channel_id] = {
+            "creator": message.author.id,
+            "game": game
+        }
         ret = game.get_computer_board()
-    await _send_message(ret, event, message)
+    await send_message(TOKEN, ret, event, message)
     return True
 
 
-@command("/菜单")
+@command("菜单")
 async def ask_menu(params: str, event: str, message: qqbot.Message):
     ret = get_menu()
-    await _send_message(ret, event, message)
+    await send_message(TOKEN, ret, event, message)
     return True
 
 
-@command("/投降")
+@command("投降")
 async def surrender(params: str, event: str, message: qqbot.Message):
-    if message.channel_id in GAME_DATA:
-        GAME_DATA.pop(message.channel_id)
-        ret = "游戏结束，您输了。"
+    game_data = _get_game_by_channel_id(message.channel_id)
+    if game_data:
+        if _is_surrenderable(message.guild_id, message.channel_id, message.author.id):
+            GAME_DATA.pop(message.channel_id)
+            ret = "游戏结束，您输了。"
+        else:
+            ret = "只有开局的人或者管理员才可以结束游戏哦"            
     else:
         ret = "游戏还没开始。您可以使用 `/开局` 指令开始游戏。"
-    await _send_message(ret, event, message)
+    await send_message(TOKEN, ret, event, message)
     return True
 
 async def do_move(params: str, event: str, message: qqbot.Message):
-    game = _get_game_by_channel_id(message.channel_id)
-    if game:
+    game_data = _get_game_by_channel_id(message.channel_id)    
+    if game_data:
+        game = game_data['game']
         res, ret = game.move(params)        
-        await _send_message(ret, event, message)
+        await send_message(TOKEN, ret, event, message)
         if res:
-            is_end, ret = game.response()
-            await _send_message(ret, event, message)
+            is_end, ret = game.response()            
             if is_end:
                 GAME_DATA.pop(message.channel_id)
+                if '您赢了' in ret and event != "DIRECT_MESSAGE_CREATE":
+                    _give_hornor(message.guild_id, message.author.id)
+                    ret += "\n\n👑恭喜获得新身份组【{}】".format(ROLE_INFO.name)
+            await send_message(TOKEN, ret, event, message)
     else:
         ret = "游戏还没开始。您可以使用 `/开局` 指令开始游戏。"
-        await _send_message(ret, event, message)
+        await send_message(TOKEN, ret, event, message)
 
-@command("/下棋", validate_func=_validate_func, invalid_func=_invalid_func)
+@command("下棋", validate_func=_validate_func, invalid_func=_invalid_func)
 async def move(params: str, event: str, message: qqbot.Message):
     await do_move(params, event, message)
     return True
@@ -120,8 +142,7 @@ async def _message_handler(event: str, message: qqbot.Message):
     if _validate_func(params):
         await do_move(params, event, message)
         return
-    await _send_message("抱歉，没明白你的意思呢。" + get_menu(), event, message)
-    
+    await send_message(TOKEN, "抱歉，没明白你的意思呢。" + get_menu(), event, message)
 
 def run():
     """
@@ -135,7 +156,7 @@ def run():
     qqbot_direct_handler = qqbot.Handler(
         qqbot.HandlerType.DIRECT_MESSAGE_EVENT_HANDLER, _message_handler
     )
-    qqbot.async_listen_events(T_TOKEN, False, qqbot_handler, qqbot_direct_handler)
+    qqbot.async_listen_events(TOKEN, False, qqbot_handler, qqbot_direct_handler)
 
 
 if __name__ == "__main__":

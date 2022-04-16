@@ -14,7 +14,7 @@ import qqbot
 def command(command_str: str, validate_func=None, invalid_func=None):
     """
     指令的装饰器
-    :param command_str: 指令的字符串。例如 `/菜单`
+    :param command_str: 指令的字符串。例如 `菜单`
     :param check_param: 是否需要检查参数
     :param invalid_func: 当参数不符合要求时的处理函数
     :return: 装饰器
