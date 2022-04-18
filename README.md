@@ -1,6 +1,8 @@
 # chinese-chess-bot
 
-中国象棋频道机器人，核心的象棋算法出自 [bupticybee/elephantfish](https://github.com/bupticybee/elephantfish)。
+中国象棋频道机器人，通过纯文本的方式进行下棋。
+
+当机器人拥有管理员权限的时候，如果有成员赢了机器人，将自动创建 “象棋大师” 身份组并为该成员添加 “象棋大师” 荣誉称号。
 
 ## 使用方法
 
@@ -16,3 +18,6 @@
     投降认输。只有开局的人才能投降
 ```
 
+## 致谢
+
+核心的象棋算法出自 [bupticybee/elephantfish](https://github.com/bupticybee/elephantfish)。
