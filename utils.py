@@ -1,7 +1,6 @@
-from typing import NoReturn
 import qqbot
 
-def is_admin(token: str, guild_id: str, user_id: str) -> NoReturn:
+def is_admin(token: str, guild_id: str, user_id: str):
     """
     判断指定用户是否管理员
     
@@ -29,7 +28,7 @@ def search_role(token: str, guild_id: str, role_name: str) -> qqbot.guild_role.R
             return role
     return None
 
-def create_role(token: str, guild_id: str, role_info: qqbot.RoleUpdateInfo) -> NoReturn:
+def create_role(token: str, guild_id: str, role_info: qqbot.RoleUpdateInfo):
     """
     添加身份组
     
@@ -57,7 +56,7 @@ def give_role(token: str, guild_id: str, user_id: str, role_info: qqbot.RoleUpda
     role = search_role(token, guild_id, role_info.name)
     return api.create_guild_role_member(guild_id, role.id, user_id, None)
 
-async def send_message(token: str, content: str, event: str, message: qqbot.Message) -> NoReturn:
+async def send_message(token: str, content: str, event: str, message: qqbot.Message):
     """
     机器人发送消息
     
