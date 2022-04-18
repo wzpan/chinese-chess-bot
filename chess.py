@@ -102,6 +102,7 @@ class ChessGame:
     def response(self):
 
         if self.hist[-1].score <= -MATE_LOWER:
+            self.hist.clear()
             return True, "\n恭喜，您赢了！\n"
 
         _, move, score = self.think()
@@ -118,8 +119,13 @@ class ChessGame:
         self.hist.append(self.hist[-1].move(move))
 
         ret += self.get_computer_board()
+        
+        if len(self.hist) > 4:
+            self.hist.pop(0)
+            self.hist.pop(0)
 
         if self.hist[-1].score <= -MATE_LOWER:
+            self.hist.clear()
             return True, ret + "\n\n游戏结束，您输了。"
 
         return False, ret
@@ -129,13 +135,7 @@ class ChessGame:
         for _depth, move, score in self.searcher.search(self.hist[-1], self.hist):
             if time.time() - start > THINK_TIME:
                 break
-        return _depth, move, score
-
-    def end_game(success):
-        if success:
-            print("你赢了！")
-            return
-        print("你输了")
+        return _depth, move, score    
 
 
 if __name__ == "__main__":
