@@ -150,8 +150,10 @@ async def who(params: str, event: str, message: qqbot.Message):
     qqbot.logger.info("谁是狐哥")
     api = qqbot.GuildMemberAPI(TOKEN, False)
     try:
-        member = api.get_guild_member(message.guild_id, "144115218678341613")
-        await send_message(TOKEN, "狐哥当前昵称： " + member.nickname, event, message)
+        qqbot.logger.info("sender id: " + message.author.id)
+        member = api.get_guild_member(message.guild_id, "9403002523398092694")
+        
+        await send_message(TOKEN, "狐哥当前昵称： " + member.nick, event, message)
     except NotFoundError as e:
         await send_message(TOKEN, "狐哥不在当前频道！", event, message)
     return True
