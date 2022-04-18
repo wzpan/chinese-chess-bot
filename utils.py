@@ -71,6 +71,7 @@ async def send_message(token: str, content: str, event: str, message: qqbot.Mess
     :param event: 事件名
     :param message: qqbot.Message消息体
     """
+    qqbot.logger.info("发送消息\n {}".format(content))
     msg_api = qqbot.AsyncMessageAPI(token, False)
     dms_api = qqbot.AsyncDmsAPI(token, False)
 

@@ -69,6 +69,7 @@ def _give_hornor(guild_id: str, user_id: str):
 
 @command("开局")
 async def start_game(params: str, event: str, message: qqbot.Message):
+    qqbot.logger.info("开局")
     if message.channel_id in GAME_DATA:
         ret = "游戏已经开始了，请等待下一局。您也可以使用 `/投降` 指令提前结束游戏。"
     else:
@@ -81,6 +82,7 @@ async def start_game(params: str, event: str, message: qqbot.Message):
 
 @command("菜单")
 async def ask_menu(params: str, event: str, message: qqbot.Message):
+    qqbot.logger.info("菜单")
     ret = get_menu()
     await send_message(TOKEN, ret, event, message)
     return True
@@ -88,6 +90,7 @@ async def ask_menu(params: str, event: str, message: qqbot.Message):
 
 @command("投降")
 async def surrender(params: str, event: str, message: qqbot.Message):
+    qqbot.logger.info("投降")
     game_data = _get_game_by_channel_id(message.channel_id)
     if game_data:
         if _is_surrenderable(message.guild_id, message.channel_id, message.author.id):
@@ -122,12 +125,14 @@ async def do_move(params: str, event: str, message: qqbot.Message):
 
 @command("下棋", validate_func=_validate_func, invalid_func=_invalid_func)
 async def move(params: str, event: str, message: qqbot.Message):
+    qqbot.logger.info("下棋")
     await do_move(params, event, message)
     return True
 
 
 @command("悔棋")
 async def cancel(params: str, event: str, message: qqbot.Message):
+    qqbot.logger.info("悔棋")
     game_data = _get_game_by_channel_id(message.channel_id)
     if game_data:
         game = game_data["game"]
