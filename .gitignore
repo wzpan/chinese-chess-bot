@@ -2,3 +2,4 @@ config.yml
 *.log
 *.pkl
 __pycache__
+*.log.*
