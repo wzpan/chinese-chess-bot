@@ -12,6 +12,7 @@ import re
 
 import qqbot
 from qqbot.core.util.yaml_util import YamlUtil
+from qqbot.core.exception.error import NotFoundError
 
 from chess import ChessGame
 from chess import get_menu
@@ -144,6 +145,18 @@ async def cancel(params: str, event: str, message: qqbot.Message):
     return True
 
 
+@command("谁是狐哥")
+async def who(params: str, event: str, message: qqbot.Message):
+    qqbot.logger.info("谁是狐哥")
+    api = qqbot.GuildMemberAPI(TOKEN, False)
+    try:
+        member = api.get_guild_member(message.guild_id, "144115218678341613")
+        await send_message(TOKEN, "狐哥当前昵称： " + member.nickname, event, message)
+    except NotFoundError as e:
+        await send_message(TOKEN, "狐哥不在当前频道！", event, message)
+    return True
+
+
 async def _message_handler(event: str, message: qqbot.Message):
     """
     定义事件回调的处理
@@ -153,7 +166,7 @@ async def _message_handler(event: str, message: qqbot.Message):
 
     qqbot.logger.info("event %s" % event + ",receive message %s" % message.content)
 
-    tasks = [ask_menu, start_game, move, cancel, surrender]
+    tasks = [ask_menu, start_game, move, cancel, surrender, who]
     for task in tasks:
         if await task("", event, message):
             return
