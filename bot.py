@@ -72,7 +72,9 @@ def _give_hornor(guild_id: str, user_id: str):
 async def start_game(params: str, event: str, message: qqbot.Message):
     qqbot.logger.info("开局")
     if message.channel_id in GAME_DATA:
-        ret = "游戏已经开始了，请等待下一局。您也可以使用 `/投降` 指令提前结束游戏。"
+        game_data = _get_game_by_channel_id(message.channel_id)        
+        ret = "游戏已经开始了，请等待下一局。您也可以使用 `/投降` 指令提前结束游戏。\n" + \
+            game_data['game'].get_computer_board()
     else:
         game = ChessGame()
         GAME_DATA[message.channel_id] = {"creator": message.author.id, "game": game}
@@ -140,21 +142,19 @@ async def cancel(params: str, event: str, message: qqbot.Message):
         ret = game.cancel()
         await send_message(TOKEN, ret, event, message)
     else:
-        ret = "游戏还没开始。您可以使用 `/开局` 指令开始游戏。"
+        ret = "游戏还没开始。您可以使用 `/开局` 指令开始游戏。\n"
         await send_message(TOKEN, ret, event, message)
     return True
 
 
-@command("谁是狐哥")
+@command("狐哥")
 async def who(params: str, event: str, message: qqbot.Message):
     qqbot.logger.info("谁是狐哥")
     api = qqbot.GuildMemberAPI(TOKEN, False)
     try:
-        qqbot.logger.info("sender id: " + message.author.id)
-        member = api.get_guild_member(message.guild_id, "9403002523398092694")
-        
+        member = api.get_guild_member(message.guild_id, "14865086357039373053")
         await send_message(TOKEN, "狐哥当前昵称： " + member.nick, event, message)
-    except NotFoundError as e:
+    except Exception as e:
         await send_message(TOKEN, "狐哥不在当前频道！", event, message)
     return True
 
@@ -172,8 +172,9 @@ async def _message_handler(event: str, message: qqbot.Message):
     for task in tasks:
         if await task("", event, message):
             return
+    message.content = message.content.replace('\xa0', ' ')
     params = (
-        message.content.split(" ")[1] if len(message.content.split(" ")) > 0 else ""
+        message.content.split(" ")[1] if len(message.content.split(" ")) > 1 else ""
     )
     if _validate_func(params):
         await do_move(params, event, message)
