@@ -12,7 +12,6 @@ import re
 
 import qqbot
 from qqbot.core.util.yaml_util import YamlUtil
-from qqbot.core.exception.error import NotFoundError
 
 from chess import ChessGame
 from chess import get_menu
@@ -20,6 +19,7 @@ from command_register import command
 from utils import give_role
 from utils import is_admin
 from utils import send_message
+from utils import search_role
 
 config = YamlUtil.read(os.path.join(os.path.dirname(__file__), "config.yml"))
 TOKEN = qqbot.Token(config["bot"]["appid"], config["bot"]["token"])
@@ -46,7 +46,7 @@ async def _invalid_func(event: str, message: qqbot.Message):
     """
     当参数不符合要求时的处理函数
     """
-    await send_message("请输入正确的步法。例如 /下棋 h2e2", event, message)
+    await send_message(TOKEN, "请输入正确的步法。例如 /下棋 h2e2", event, message)
     return True
 
 
@@ -149,6 +149,9 @@ async def cancel(params: str, event: str, message: qqbot.Message):
 
 @command("狐哥")
 async def who(params: str, event: str, message: qqbot.Message):
+    """
+    彩蛋功能：从茫茫人海里找出狐哥
+    """
     qqbot.logger.info("谁是狐哥")
     api = qqbot.GuildMemberAPI(TOKEN, False)
     try:
@@ -158,6 +161,38 @@ async def who(params: str, event: str, message: qqbot.Message):
         await send_message(TOKEN, "狐哥不在当前频道！", event, message)
     return True
 
+def _validate_user_id(param):
+    print(param)
+    return param and re.match("<@\!([0-9]+)>", param)
+
+
+async def _invalid_user_id(event: str, message: qqbot.Message):
+    """
+    当参数不符合要求时的处理函数
+    """
+    await send_message(TOKEN, "请在指令后at你想官方认证的用户", event, message)
+    return True
+
+@command("官方认证", validate_func=_validate_user_id, invalid_func=_invalid_user_id)
+async def is_official(params: str, event: str, message: qqbot.Message):
+    """
+    彩蛋功能：判断是否官方人员
+    """
+    qqbot.logger.info("官方认证")
+    qqbot.logger.info(params)
+    user_id = re.match("<@\!([0-9]+)>", params).group(1)
+    api = qqbot.GuildMemberAPI(TOKEN, False)
+    try:
+        member = api.get_guild_member(message.guild_id, user_id)
+        role = search_role(TOKEN, message.guild_id, "超强的内部团队")
+        if role and role.id in member.roles:
+            await send_message(TOKEN, member.nick + "是官方人员", event, message)
+        else:
+            await send_message(TOKEN, member.nick + "不是官方人员", event, message)
+    except Exception as e:
+        await send_message(TOKEN, "判断失败", event, message)
+    return True
+    
 
 async def _message_handler(event: str, message: qqbot.Message):
     """
@@ -168,7 +203,7 @@ async def _message_handler(event: str, message: qqbot.Message):
 
     qqbot.logger.info("event %s" % event + ",receive message %s" % message.content)
 
-    tasks = [ask_menu, start_game, move, cancel, surrender, who]
+    tasks = [ask_menu, start_game, move, cancel, surrender, who, is_official]
     for task in tasks:
         if await task("", event, message):
             return
