@@ -28,7 +28,7 @@ class ChineseChessBot(Bot):
         self.game_data = {}
 
     async def handel_message(self, event: str, message: qqbot.Message):
-        message.content = message.content.replace('<@!7299022415162286232>', '').strip()
+        message.content = message.content.replace(f'<@!{self.config["bot"]["id"]}>', '').strip()
         if await self.process_commands(event, message):
             return
         params = message.content.split()
