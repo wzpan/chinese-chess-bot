@@ -1,3 +1,4 @@
 qq-bot
 asyncio
 aiohttp
+pyyaml

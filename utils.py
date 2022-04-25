@@ -1,7 +1,10 @@
+from typing import Optional
+
 import qqbot
+from qqbot import Token
 
 
-def is_admin(token: str, guild_id: str, user_id: str):
+def is_admin(token: Token, guild_id: str, user_id: str):
     """
     判断指定用户是否管理员
 
@@ -14,7 +17,7 @@ def is_admin(token: str, guild_id: str, user_id: str):
     return any(role in member.roles for role in ("2", "4"))
 
 
-def search_role(token: str, guild_id: str, role_name: str) -> qqbot.guild_role.Role:
+def search_role(token: Token, guild_id: str, role_name: str) -> Optional[qqbot.guild_role.Role]:
     """
     根据名字查找某个身份组
 
@@ -28,10 +31,9 @@ def search_role(token: str, guild_id: str, role_name: str) -> qqbot.guild_role.R
     for role in guild_roles.roles:
         if role.name == role_name:
             return role
-    return None
 
 
-def create_role(token: str, guild_id: str, role_info: qqbot.RoleUpdateInfo):
+def create_role(token: Token, guild_id: str, role_info: qqbot.RoleUpdateInfo):
     """
     添加身份组
 
@@ -46,7 +48,7 @@ def create_role(token: str, guild_id: str, role_info: qqbot.RoleUpdateInfo):
 
 
 def give_role(
-    token: str, guild_id: str, user_id: str, role_info: qqbot.RoleUpdateInfo
+        token: Token, guild_id: str, user_id: str, role_info: qqbot.RoleUpdateInfo
 ) -> bool:
     """
     为指定用户添加身份组
@@ -63,10 +65,10 @@ def give_role(
     return api.create_guild_role_member(guild_id, role.id, user_id, None)
 
 
-async def send_message(token: str, content: str, event: str, message: qqbot.Message):
+async def send_message(token: Token, content: str, event: str, message: qqbot.Message):
     """
     机器人发送消息
-
+    :param token: 机器人 Token 对象
     :param content: 发消息的内容
     :param event: 事件名
     :param message: qqbot.Message消息体

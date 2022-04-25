@@ -1,9 +1,10 @@
 bot:
   appid: "YOUR_BOT_APPID"
   token: "YOUR_BOT_TOKEN"
+  id: "YOUR_BOT_USER_ID"
 
 # 是否给获胜者颁发象棋大师身份组
-hornor_role:
+honor_role:
   enable: true
   name: "象棋大师"
   color: "16747008"
