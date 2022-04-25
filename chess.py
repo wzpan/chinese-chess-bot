@@ -42,8 +42,8 @@ class ChessGame:
     对 bupticybee/elephantfish 的封装    
     """
     def __init__(self):
-        self.hist = [Position(initial, 0)]
-        self.searcher = Searcher()
+        self.hist = [Position(initial, 0)]  # 历史记录
+        self.searcher = Searcher()  # 解法查找器
 
     def parse(self, c):
         fil, rank = ord(c[0]) - ord("a"), int(c[1])
