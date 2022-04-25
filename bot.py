@@ -18,7 +18,6 @@ from utils import give_role, is_admin, send_message
 
 
 class ChineseChessBot(Bot):
-
     def __init__(self, prefix: str):
         super().__init__(prefix)
         self.enable_honor = self.config["honor_role"]["enable"]
@@ -28,7 +27,7 @@ class ChineseChessBot(Bot):
         self.game_data = {}
 
     async def handle_message(self, event: str, message: qqbot.Message):
-        message.content = re.sub(r'<@\![0-9]+>', '', message.content).strip()
+        message.content = re.sub(r"<@\![0-9]+>", "", message.content).strip()
         if await self.process_commands(event, message):
             return
         params = message.content.split()
@@ -39,7 +38,7 @@ class ChineseChessBot(Bot):
         await send_message(self.token, "抱歉，没明白你的意思呢。" + get_menu(), event, message)
 
 
-bot = ChineseChessBot(prefix='/')
+bot = ChineseChessBot(prefix="/")
 
 
 def _get_game_by_channel_id(channel_id: str):
@@ -53,7 +52,9 @@ def _validate_func(param):
     return param and re.match(".*([a-i][0-9])([a-i][0-9])", param)
 
 
-async def _invalid_func(error: BaseException, params: str, event: str, message: qqbot.Message):
+async def _invalid_func(
+    error: BaseException, params: str, event: str, message: qqbot.Message
+):
     """
     当参数不符合要求时的处理函数
     """
@@ -67,7 +68,9 @@ def _is_surrenderable(guild_id: str, channel_id: str, user_id: str):
     只有开局的人和管理员才能结束游戏
     """
     game = _get_game_by_channel_id(channel_id)
-    return is_admin(bot.token, guild_id, user_id) or (game and game["creator"] == user_id)
+    return is_admin(bot.token, guild_id, user_id) or (
+        game and game["creator"] == user_id
+    )
 
 
 def _give_honor(guild_id: str, user_id: str):

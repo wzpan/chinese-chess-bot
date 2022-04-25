@@ -93,7 +93,7 @@ class ChessGame:
     def cancel(self):
         if len(self.hist) > 2:
             self.hist.pop()
-            self.hist.pop()            
+            self.hist.pop()
             return "好吧，让你悔一步棋\n\n" + self.get_computer_board()
         else:
             return "当前已经没有可以悔棋的步骤啦"
@@ -118,7 +118,7 @@ class ChessGame:
         self.hist.append(self.hist[-1].move(move))
 
         ret += self.get_computer_board()
-        
+
         if len(self.hist) > 4:
             self.hist.pop(0)
             self.hist.pop(0)
@@ -134,7 +134,7 @@ class ChessGame:
         for _depth, move, score in self.searcher.search(self.hist[-1], self.hist):
             if time.time() - start > THINK_TIME:
                 break
-        return _depth, move, score    
+        return _depth, move, score
 
 
 if __name__ == "__main__":

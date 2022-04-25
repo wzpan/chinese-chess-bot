@@ -14,7 +14,7 @@ from typing import Callable, Coroutine, TypeVar, Any, Dict
 import qqbot
 from qqbot.core.util.yaml_util import YamlUtil
 
-T = TypeVar('T')
+T = TypeVar("T")
 Coro = Coroutine[Any, Any, T]
 
 
@@ -32,7 +32,9 @@ class Command:
 
 class Bot:
     def __init__(self, prefix: str):
-        self.token = qqbot.Token(self.config["bot"]["appid"], self.config["bot"]["token"])
+        self.token = qqbot.Token(
+            self.config["bot"]["appid"], self.config["bot"]["token"]
+        )
         self.prefix = prefix
         self.commands: Dict[str, Command] = {}
 
@@ -41,9 +43,10 @@ class Bot:
         return YamlUtil.read(os.path.join(os.path.dirname(__file__), "config.yml"))
 
     def command(
-            self, name: str,
-            checks: Callable[[str], bool] = None,
-            on_error: Callable[[BaseException, str, str, qqbot.Message], Coro[Any]] = None
+        self,
+        name: str,
+        checks: Callable[[str], bool] = None,
+        on_error: Callable[[BaseException, str, str, qqbot.Message], Coro[Any]] = None,
     ):
         """
         指令的装饰器
@@ -55,7 +58,7 @@ class Bot:
 
         def decorator(func: Callable[[str, str, qqbot.Message], Coro[Any]]):
             if not asyncio.iscoroutinefunction(func):
-                raise TypeError('回调必须是协程。')
+                raise TypeError("回调必须是协程。")
             result = Command(name=name, callback=func, checks=checks, on_error=on_error)
             self.commands[name] = result
             return result
@@ -72,7 +75,9 @@ class Bot:
         if invoked_command.checks:
             if not invoked_command.checks(params):
                 if invoked_command.on_error:
-                    await invoked_command.on_error(CheckFailed(), params, event, message)
+                    await invoked_command.on_error(
+                        CheckFailed(), params, event, message
+                    )
                 return False
         param = split[1] if len(split) > 1 else ""
         qqbot.logger.info("command %s, param %s" % (invoked_command.name, param))
