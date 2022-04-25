@@ -7,8 +7,7 @@ from elephantfish import *
 
 
 def get_menu():
-    return """
-功能菜单：
+    return """功能菜单：
 /开局
     开一局游戏
 /下棋 行1列1行2列2

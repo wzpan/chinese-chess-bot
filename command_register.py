@@ -64,8 +64,6 @@ class Bot:
 
     async def process_commands(self, event: str, message: qqbot.Message):
         qqbot.logger.info("event %s" % event + ",receive message %s" % message.content)
-        if not message.content.startswith(self.prefix):
-            return False
         params = message.content.removeprefix(self.prefix)
         split = params.split()
         if split[0] not in self.commands:
@@ -76,15 +74,16 @@ class Bot:
                 if invoked_command.on_error:
                     await invoked_command.on_error(CheckFailed(), params, event, message)
                 return False
-        qqbot.logger.info("command %s" % invoked_command.name)
+        param = split[1] if len(split) > 1 else ""
+        qqbot.logger.info("command %s, param %s" % (invoked_command.name, param))
         try:
-            await invoked_command.callback(params, event, message)
+            await invoked_command.callback(param, event, message)
         except Exception as e:
             if invoked_command.on_error:
-                await invoked_command.on_error(e, params, event, message)
+                await invoked_command.on_error(e, param, event, message)
         return True
 
-    async def handel_message(self, event: str, message: qqbot.Message):
+    async def handle_message(self, event: str, message: qqbot.Message):
         """
         定义事件回调的处理
         :param event: 事件类型

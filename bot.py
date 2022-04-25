@@ -27,8 +27,8 @@ class ChineseChessBot(Bot):
         )
         self.game_data = {}
 
-    async def handel_message(self, event: str, message: qqbot.Message):
-        message.content = message.content.replace(f'<@!{self.config["bot"]["id"]}>', '').strip()
+    async def handle_message(self, event: str, message: qqbot.Message):
+        message.content = re.sub(r'<@\![0-9]+>', '', message.content).strip()
         if await self.process_commands(event, message):
             return
         params = message.content.split()
@@ -50,7 +50,7 @@ def _get_game_by_channel_id(channel_id: str):
 
 
 def _validate_func(param):
-    return param and re.match("([a-i][0-9])" * 2, param)
+    return param and re.match(".*([a-i][0-9])([a-i][0-9])", param)
 
 
 async def _invalid_func(error: BaseException, params: str, event: str, message: qqbot.Message):
@@ -135,7 +135,7 @@ async def do_move(params: str, event: str, message: qqbot.Message):
         await send_message(bot.token, ret, event, message)
 
 
-@bot.command("下棋", checks=_validate_func)
+@bot.command("下棋", checks=_validate_func, on_error=_invalid_func)
 async def move(params: str, event: str, message: qqbot.Message):
     qqbot.logger.info("下棋")
     await do_move(params, event, message)
@@ -162,11 +162,11 @@ def run():
     """
     # @机器人后推送被动消息
     qqbot_handler = qqbot.Handler(
-        qqbot.HandlerType.AT_MESSAGE_EVENT_HANDLER, bot.handel_message
+        qqbot.HandlerType.AT_MESSAGE_EVENT_HANDLER, bot.handle_message
     )
     # 私信消息
     qqbot_direct_handler = qqbot.Handler(
-        qqbot.HandlerType.DIRECT_MESSAGE_EVENT_HANDLER, bot.handel_message
+        qqbot.HandlerType.DIRECT_MESSAGE_EVENT_HANDLER, bot.handle_message
     )
     qqbot.async_listen_events(bot.token, False, qqbot_handler, qqbot_direct_handler)
 

@@ -1,7 +1,6 @@
 bot:
   appid: "YOUR_BOT_APPID"
-  token: "YOUR_BOT_TOKEN"
-  id: "YOUR_BOT_USER_ID"
+  token: "YOUR_BOT_TOKEN"  
 
 # 是否给获胜者颁发象棋大师身份组
 honor_role:
