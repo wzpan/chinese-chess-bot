@@ -38,6 +38,9 @@ def get_ack():
 
 
 class ChessGame:
+    """
+    对 bupticybee/elephantfish 的封装    
+    """
     def __init__(self):
         self.hist = [Position(initial, 0)]
         self.searcher = Searcher()
@@ -51,6 +54,9 @@ class ChessGame:
         return chr(fil + ord("a")) + str(-rank)
 
     def get_board(self, pos):
+        """
+        获得象棋棋盘文本
+        """
         res = ""
         uni_pieces = {
             "R": "车",
@@ -75,12 +81,24 @@ class ChessGame:
         return res
 
     def get_computer_board(self):
+        """
+        获得电脑走完后（或者初始）的棋盘
+        """
         return self.get_board(self.hist[-1])
 
     def get_player_board(self):
+        """
+        获得玩家走完后的棋盘
+        """
         return self.get_board(self.hist[-1].rotate())
 
     def move(self, move_str) -> str:
+        """
+        玩家下棋
+        
+        :param move_str: 下棋的走法表示字符串，例如 h2e2
+        :return: 是否有效下棋, 对应的提示信息
+        """
         match = re.match("([a-i][0-9])" * 2, move_str)
         move = self.parse(match.group(1)), self.parse(match.group(2))
 
@@ -91,6 +109,9 @@ class ChessGame:
             return False, "走法不合法，请使用 `/下棋` 指令重试"
 
     def cancel(self):
+        """
+        玩家悔棋
+        """
         if len(self.hist) > 2:
             self.hist.pop()
             self.hist.pop()
@@ -99,7 +120,11 @@ class ChessGame:
             return "当前已经没有可以悔棋的步骤啦"
 
     def response(self):
-
+        """
+        电脑下棋及结果判断
+        
+        :return: 是否结束游戏, 提示信息
+        """
         if self.hist[-1].score <= -MATE_LOWER:
             self.hist.clear()
             return True, "\n恭喜，您赢了！\n"
@@ -130,6 +155,13 @@ class ChessGame:
         return False, ret
 
     def think(self):
+        """
+        电脑思考
+        
+        在限定时间内完成下一步的思考，并返回走法。
+        可以通过调整 `TIME_LIMIT` 来设置电脑的最长思考时间。
+        值越长，电脑越强，但响应时间也会越久。
+        """
         start = time.time()
         for _depth, move, score in self.searcher.search(self.hist[-1], self.hist):
             if time.time() - start > THINK_TIME:
