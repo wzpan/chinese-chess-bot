@@ -20,9 +20,9 @@ from utils import give_role, is_admin, send_message
 class ChineseChessBot(Bot):
     def __init__(self, prefix: str):
         super().__init__(prefix)
-        self.enable_honor = self.config["honor_role"]["enable"]
+        self.enable_hornor = self.config["hornor_role"]["enable"]
         self.role_info = qqbot.RoleUpdateInfo(
-            self.config["honor_role"]["name"], self.config["honor_role"]["color"], 1
+            self.config["hornor_role"]["name"], self.config["hornor_role"]["color"], 1
         )
         self.game_data = {}
 
@@ -73,9 +73,9 @@ def _is_surrenderable(guild_id: str, channel_id: str, user_id: str):
     )
 
 
-def _give_honor(guild_id: str, user_id: str):
+def _give_hornor(guild_id: str, user_id: str):
     api = qqbot.UserAPI(bot.token, False)
-    if bot.enable_honor and is_admin(bot.token, guild_id, api.me().id):
+    if bot.enable_hornor and is_admin(bot.token, guild_id, api.me().id):
         qqbot.logger.info("颁发象棋大师身份组")
         give_role(bot.token, guild_id, user_id, bot.role_info)
     else:
@@ -130,7 +130,7 @@ async def do_move(params: str, event: str, message: qqbot.Message):
             if is_end:
                 bot.game_data.pop(message.channel_id)
                 if "您赢了" in ret and event != "DIRECT_MESSAGE_CREATE":
-                    _give_honor(message.guild_id, message.author.id)
+                    _give_hornor(message.guild_id, message.author.id)
                     ret += "\n\n👑恭喜获得新身份组【{}】".format(bot.role_info.name)
             await send_message(bot.token, ret, event, message)
     else:
